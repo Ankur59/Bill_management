@@ -22,13 +22,15 @@ const Form = ({ onSubmit }) => {
   );
 
   useEffect(() => {
-    const totalamount = total;
-    const paidamount = paid;
-    if (total >= paid) {
-      setRemain((Number(totalamount) - Number(paidamount)).toString());
-    } else {
-      setRemain("0");
+    const diff=(total-paid)
+    const check=(diff)=>{if(diff>=0){
+    const fin=diff.toString()
+    setRemain(fin)}
+    else{
+      setRemain("Gandu")
     }
+  }
+    check(diff)
   }, [total, paid]);
 
   const handleSubmit = () => {
@@ -201,7 +203,6 @@ const styles = StyleSheet.create({
   textInput: {
     width: "100%",
     marginBottom: 15,
-    borderColor: "blue",
   },
   centered: {
     flex: 1,
