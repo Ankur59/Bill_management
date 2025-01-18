@@ -3,7 +3,7 @@ import React from "react";
 
 const Card = ({
   Name,
-  Left = 50,
+  Left,
   Total,
   Paid,
   Item,
