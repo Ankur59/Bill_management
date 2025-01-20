@@ -1,5 +1,7 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import EvilIcons from "@expo/vector-icons/EvilIcons";
 
 const Card = ({
   Name,
@@ -11,6 +13,8 @@ const Card = ({
   id,
   adv_date,
   final_date,
+  action,
+  edit_act
 }) => {
   const colors = {
     green: "#00FF00",
@@ -33,6 +37,18 @@ const Card = ({
   return (
     <View style={styles.card}>
       <View style={[styles.dot, { backgroundColor: dotColor }]} />
+      <TouchableOpacity
+        style={[styles.del, { backgroundColor: dotColor, borderRadius: 50 }]}
+        onPress={action}
+      >
+        <MaterialIcons name="delete" size={24} color="black" />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.del, { backgroundColor: dotColor, borderRadius: 50 }]}
+        onPress={edit_act}
+      >
+        <EvilIcons name="pencil" size={24} color="black" />
+      </TouchableOpacity>
       <Text style={styles.billId}>Bill ID: {id}</Text>
       <Text style={styles.name}>{Name}</Text>
       <View style={styles.infoContainer}>
@@ -69,8 +85,8 @@ const styles = StyleSheet.create({
     borderColor: "blue",
     borderWidth: 2,
     backgroundColor: "white",
-    height: 320,
-    width: 300,
+    height: 340,
+    width: 400,
     margin: 20,
     borderRadius: 20,
     padding: 20,
@@ -80,6 +96,11 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5, // For Android shadow
     position: "relative", // Allows positioning of the dot
+  },
+  del: {
+    height:25,
+    width: 25,
+    marginTop:2,
   },
   dot: {
     height: 10,
@@ -94,6 +115,7 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     color: "#555",
     marginBottom: 5,
+    marginTop:5
   },
   name: {
     fontSize: 25,

@@ -2,12 +2,13 @@ import { Stack } from "expo-router";
 
 const Layout = () => {
   return (
-    <Stack screenOptions={{headerShown:false}}>
+    <Stack >
       {/* Default screen */}
       <Stack.Screen
         name="index"
         options={{
           title: "Bill management",
+          headerShown:false
         }}
       />
       <Stack.Screen

@@ -1,17 +1,9 @@
-import {
-  View,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  Modal,
-  Alert,
-} from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
 import { TextInput } from "react-native-paper";
-import DatePicker from "react-native-modern-datepicker";
-import { getFormatedDate } from "react-native-modern-datepicker";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import DateTimePicker from "@react-native-community/datetimepicker"; // Updated import
 
 const Form = () => {
   const [name, setName] = useState(""); // Store name input
@@ -19,24 +11,21 @@ const Form = () => {
   const [paid, setPaid] = useState(""); // Store amount paid input
   const [item, setItem] = useState(""); // Store item name input
   const [quantity, setQuantity] = useState(""); // Store quantity input
-  const [remain, setRemain] = useState(""); // Store calculated remaining amount
-  const [date, setDate] = useState(); // Store selected date
-  const [open, setOpen] = useState(false); // Toggle date picker modal visibility
-  const [id, setId] = useState(""); // Store ID (not currently used in the code)
+  const [remain, setRemain] = useState(); // Store calculated remaining amount
+  const [date, setDate] = useState(""); // Store selected date as string
+  const [open, setOpen] = useState(false); // Toggle date picker visibility
 
   // Save function to store data in AsyncStorage
   const save = async () => {
     try {
       // Ensure all fields are filled
       if (name && total && paid && item && quantity && date) {
-        // Validate that total and paid are numeric values
-
         // Calculate the remaining amount (Total - Paid)
         const calculatedRemain = Math.max(
           0,
           parseFloat(total) - parseFloat(paid)
         );
-        const unique=Date.now();
+        const unique = Date.now();
         // Fetch existing data from AsyncStorage and parse it
         const previous = await AsyncStorage.getItem("BillData");
         const formatted = previous ? JSON.parse(previous) : [];
@@ -50,8 +39,8 @@ const Form = () => {
             paid,
             item,
             quantity,
-            remain: calculatedRemain.toString(), // Store the calculated remain
-            id:unique,
+            remain: calculatedRemain.toString(), // Store the calculated
+            id: unique,
             date,
           },
         ];
@@ -70,27 +59,34 @@ const Form = () => {
     }
   };
 
-  // Get today's date and format it
+  // Get today's date
   const today = new Date();
-  const startDate = getFormatedDate(
-    today.setDate(today.getDate() + 1),
-    "DD/MM/YYYY"
-  );
+  const startDate = today.toISOString().split("T")[0]; // Formatting date to yyyy-mm-dd
 
   useEffect(() => {
-    const diff=(total-paid)
-    const check=(diff)=>{if(diff>=0){
-    const fin=diff.toString()
-    setRemain(fin)}
-    else{
-      setRemain("0")
-    }
-  }
-    check(diff)
+    const diff = total - paid;
+    const check = (diff) => {
+      if (diff >= 0) {
+        const fin = diff.toString();
+        setRemain(fin);
+      } else {
+        setRemain("0");
+      }
+    };
+    check(diff);
   }, [total, paid]);
 
-  // Handle date picker modal visibility toggle
-  function handleOnPress() {
+  // Format date to display in DD/MM/YYYY
+  const formatDate = (date) => {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Handle date picker visibility toggle
+  function handleDatePicker() {
     setOpen(!open);
   }
 
@@ -165,12 +161,12 @@ const Form = () => {
           label="Final payment Date"
           mode="outlined"
           editable={false}
-          value={date}
+          value={date ? formatDate(date) : ""} // Formats date to DD/MM/YYYY
           style={{ width: "100%", marginBottom: 15, borderColor: "blue" }}
         />
 
         <TouchableOpacity
-          onPress={handleOnPress}
+          onPress={handleDatePicker}
           style={{
             backgroundColor: "blue",
             borderRadius: 30,
@@ -186,62 +182,38 @@ const Form = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Date picker modal */}
-      <Modal animationType="slide" transparent={true} visible={open}>
-        <View style={styles.centered}>
-          <View style={styles.modal}>
-            <DatePicker
-              mode="calendar"
-              selected={date}
-              minimumDate={startDate}
-              onSelectedChange={(date) => setDate(date)}
-            />
-
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                width: "100%",
-              }}
-            >
-              <TouchableOpacity
-                onPress={handleOnPress}
-                style={{
-                  backgroundColor: "blue",
-                  borderRadius: 30,
-                  height: 40,
-                  width: 120,
-                  padding: 10,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Text style={{ color: "white" }}>Done</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleOnPress}
-                style={{
-                  backgroundColor: "red",
-                  borderRadius: 30,
-                  height: 40,
-                  width: 120,
-                  padding: 10,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Text style={{ color: "white" }}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {/* DateTimePicker directly below without modal */}
+      {open && (
+        <DateTimePicker
+          value={date ? new Date(date) : new Date()} // Use the selected date or current date
+          mode="date" // Mode is date picker
+          display="default"
+          onChange={(event, selectedDate) => {
+            const currentDate = selectedDate || date;
+            setDate(currentDate);
+            setOpen(false); // Close the date picker after selection
+          }}
+        />
+      )}
 
       {/* Submit button */}
-      <View style={{ marginTop: 20 }}>
-        <TouchableOpacity onPress={save}>
-          <Text>Submit</Text>
+      <View>
+        <TouchableOpacity
+          onPress={save}
+          style={{
+            marginTop: 20,
+            paddingHorizontal: 5,
+            backgroundColor: "blue",
+            borderRadius: 30,
+            height: 52,
+            width: 120,
+            marginLeft: 20,
+            padding: 10,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ color: "white" }}>Submit</Text>
         </TouchableOpacity>
       </View>
     </View>
