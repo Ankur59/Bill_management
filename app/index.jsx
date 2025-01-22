@@ -65,6 +65,14 @@ export default function Index() {
     setCards(updateddata);
     setModalVisible(false);
   };
+  const handle_edit = async () => {
+    const edited = cards.map((card) =>
+      card.id === editcard.id ? editcard : card
+    );
+    await AsyncStorage.setItem("BillData", JSON.stringify(edited));
+    setCards(edited);
+    setModalVisible(false);
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.cardContainer}>
@@ -153,7 +161,7 @@ export default function Index() {
                 [
                   {
                     text: "Yes",
-                    onPress: () => console.log(editdata),
+                    onPress: () => handle_edit(),
                   },
                   {
                     text: "Cancel",
@@ -165,7 +173,7 @@ export default function Index() {
             <Text>Change</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={()=>(setModalVisible(false))}>
+          <TouchableOpacity onPress={() => setModalVisible(false)}>
             <Text>cancel</Text>
           </TouchableOpacity>
         </View>
