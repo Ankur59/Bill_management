@@ -57,18 +57,20 @@ export default function Index() {
     setModalVisible(true);
     seteditdata(card);
   };
-  const handleeditpress = async () => {
-    const updateddata = cards.map((card) => {
-      card.id == editdata.id ? editdata : card;
-    });
-    await AsyncStorage.setItem("BillData", updateddata);
-    setCards(updateddata);
-    setModalVisible(false);
-  };
   const handle_edit = async () => {
-    const edited = cards.map((card) =>
-      card.id === editcard.id ? editcard : card
-    );
+    const edited = cards.map((card) => {
+      if (card.id === editdata.id) {
+        const updatedCard = {
+          ...editdata,
+          remain:
+            parseFloat(editdata.total) - parseFloat(editdata.paid) > 0
+              ? parseFloat(editdata.total) - parseFloat(editdata.paid)
+              : 0,
+        };
+        return updatedCard;
+      }
+      return card;
+    });
     await AsyncStorage.setItem("BillData", JSON.stringify(edited));
     setCards(edited);
     setModalVisible(false);
@@ -111,71 +113,83 @@ export default function Index() {
       </TouchableOpacity>
       <Modal
         animationType="slide"
-        transparent={false}
+        transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View>
-          <TextInput
-            label="Enter name"
-            mode="outlined"
-            value={editdata.name}
-            onChangeText={(text) => seteditdata({ ...editdata, name: text })}
-            style={styles.textInput}
-          />
-          <TextInput
-            label="Enter Total Amount"
-            mode="outlined"
-            value={editdata.total}
-            onChangeText={(text) => seteditdata({ ...editdata, total: text })}
-            style={styles.textInput}
-          />
-          <TextInput
-            label="Enter Amount Paid"
-            mode="outlined"
-            value={editdata.paid}
-            onChangeText={(text) => seteditdata({ ...editdata, paid: text })}
-            style={styles.textInput}
-          />
-          <TextInput
-            label="Enter Name of the Item"
-            mode="outlined"
-            value={editdata.item}
-            onChangeText={(text) => seteditdata({ ...editdata, item: text })}
-            style={styles.textInput}
-          />
-          <TextInput
-            label="Enter Quantity"
-            mode="outlined"
-            value={editdata.quantity}
-            onChangeText={(text) =>
-              seteditdata({ ...editdata, quantity: text })
-            }
-            style={styles.textInput}
-          />
-          <TouchableOpacity
-            onPress={() => {
-              Alert.alert(
-                `Are you sure you want to change details for ${editdata.name}`,
-                "",
-                [
-                  {
-                    text: "Yes",
-                    onPress: () => handle_edit(),
-                  },
-                  {
-                    text: "Cancel",
-                  },
-                ]
-              );
-            }}
-          >
-            <Text>Change</Text>
-          </TouchableOpacity>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Edit Bill</Text>
 
-          <TouchableOpacity onPress={() => setModalVisible(false)}>
-            <Text>cancel</Text>
-          </TouchableOpacity>
+            <TextInput
+              label="Enter name"
+              mode="outlined"
+              value={editdata.name}
+              onChangeText={(text) => seteditdata({ ...editdata, name: text })}
+              style={styles.textInput}
+            />
+            <TextInput
+              label="Enter Total Amount"
+              mode="outlined"
+              value={editdata.total}
+              onChangeText={(text) => seteditdata({ ...editdata, total: text })}
+              style={styles.textInput}
+            />
+            <TextInput
+              label="Enter Amount Paid"
+              mode="outlined"
+              value={editdata.paid}
+              onChangeText={(text) => seteditdata({ ...editdata, paid: text })}
+              style={styles.textInput}
+            />
+            <TextInput
+              label="Enter Name of the Item"
+              mode="outlined"
+              value={editdata.item}
+              onChangeText={(text) => seteditdata({ ...editdata, item: text })}
+              style={styles.textInput}
+            />
+            <TextInput
+              label="Enter Quantity"
+              mode="outlined"
+              value={editdata.quantity}
+              onChangeText={(text) =>
+                seteditdata({ ...editdata, quantity: text })
+              }
+              style={styles.textInput}
+            />
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={() => {
+                  Alert.alert(
+                    `Are you sure you want to change details for ${editdata.name}`,
+                    "",
+                    [
+                      {
+                        text: "Yes",
+                        onPress: () => handle_edit(),
+                      },
+                      {
+                        text: "Cancel",
+                        style: "cancel",
+                      },
+                    ]
+                  );
+                }}
+              >
+                <Text style={styles.buttonText}>Save Changes</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </Modal>
     </SafeAreaView>
@@ -227,5 +241,56 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     alignSelf: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "90%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  textInput: {
+    marginBottom: 15,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  confirmButton: {
+    backgroundColor: "#28a745",
+    padding: 15,
+    borderRadius: 10,
+    flex: 1,
+    marginRight: 10,
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#dc3545",
+    padding: 15,
+    borderRadius: 10,
+    flex: 1,
+    marginLeft: 10,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
   },
 });
